@@ -26,6 +26,7 @@
 #include <pcl_ros/transforms.h>
 
 #include <nav_msgs/OccupancyGrid.h>
+#include <nav_msgs/Path.h>
 
 #include <heuristic_planners/GetPath.h>
 #include <heuristic_planners/SetAlgorithm.h>
@@ -56,7 +57,7 @@ public:
 
         line_markers_pub_  = lnh_.advertise<visualization_msgs::Marker>("path_line_markers", 1);
         point_markers_pub_ = lnh_.advertise<visualization_msgs::Marker>("path_points_markers", 1);
-
+        path_pub_          = lnh_.advertise<nav_msgs::Path>("path", 1);
     }
 
 private:
@@ -151,7 +152,6 @@ private:
                         _rep.max_los.data              = std::get<unsigned int>(path_data["max_line_of_sight_cells"]);
                     }
                     path = std::get<Planners::utils::CoordinateList>(path_data["path"]);
-
                 }catch(std::bad_variant_access const& ex){
                     std::cerr << "Bad variant error: " << ex.what() << std::endl;
                 }
@@ -208,7 +208,7 @@ private:
 
                     publishMarker(path_line_markers_, line_markers_pub_);
                     publishMarker(path_points_markers_, point_markers_pub_);
-
+                    publishPath(path);
                     path_line_markers_.points.clear();
                     path_points_markers_.points.clear();
 
@@ -413,6 +413,25 @@ private:
         _marker.action = visualization_msgs::Marker::ADD;
         _pub.publish(_marker);
     }
+
+    void publishPath(const Planners::utils::CoordinateList &_path){
+        nav_msgs::Path path;
+        path.header.frame_id = "map";
+        path.header.stamp = ros::Time::now();
+        for(const auto &it: _path){
+            geometry_msgs::PoseStamped pose;
+            pose.pose.position.x = it.x * resolution_;
+            pose.pose.position.y = it.y * resolution_;
+            pose.pose.position.z = it.z * resolution_;
+            pose.pose.orientation.w = 1;
+            pose.pose.orientation.x = 0;
+            pose.pose.orientation.y = 0;
+            pose.pose.orientation.z = 0;
+            path.poses.push_back(pose);
+        }
+        path_pub_.publish(path);
+    }
+
     void setRandomColor(std_msgs::ColorRGBA &_color, unsigned int _n_div = 20){
         //Using golden angle approximation
         const double golden_angle = 180 * (3 - sqrt(5));
@@ -433,7 +452,7 @@ private:
     ros::ServiceServer request_path_server_, change_planner_server_;
     ros::Subscriber pointcloud_sub_, occupancy_grid_sub_;
     //TODO Fix point markers
-    ros::Publisher line_markers_pub_, point_markers_pub_;
+    ros::Publisher line_markers_pub_, point_markers_pub_, path_pub_;
 
     std::unique_ptr<Grid3d> m_grid3d_;
 

@@ -3,7 +3,7 @@ project(heuristic_planners)
 
 add_compile_options(-std=c++17 -Wall -Werror -Wextra -pedantic )
 
-option(BUILD_DOC            "Build documentation   " ON)
+option(BUILD_DOC            "Build documentation   " OFF)
 option(BUILD_ROS_SUPPORT    "Build with ROS Support" ON)
 option(OPTIMIZE_FLAG        "Enable Compiler Optimization for Runtime Performance" ON)
 option(BUILD_DEBUG          "Build debug features  " OFF)
