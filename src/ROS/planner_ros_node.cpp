@@ -102,7 +102,7 @@ private:
             configureHeuristic(_req.heuristic.data);
         }
 
-        ROS_INFO("Path requested, computing path");
+        // ROS_INFO("Path requested, computing path");
         //delete previous markers
         publishMarker(path_line_markers_, line_markers_pub_);
         publishMarker(path_points_markers_, point_markers_pub_);
@@ -212,7 +212,7 @@ private:
                     path_line_markers_.points.clear();
                     path_points_markers_.points.clear();
 
-                    ROS_INFO("Path calculated succesfully");
+                    // ROS_INFO("Path calculated succesfully");
                 }
             }else{
                 ROS_INFO("Could not calculate path between request points");
